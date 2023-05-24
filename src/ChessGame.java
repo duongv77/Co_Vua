@@ -124,9 +124,18 @@ public class ChessGame extends JFrame {
                             if (checkChessDie(chessCheckmate)) {
                                 /*
                                  * - Trong trường hợp xảy ra chiếu cờ và quân vua không còn nước cờ nào có thể đi.
-                                 * - Thì kiểm tra xem phía quân bị
+                                 * - Thì kiểm tra xem phía quân bị chiếu có quân nào ăn được quân chiếu hay không
                                  * */
-                                showPopupNotify(String.format("Hết cờ, phía cờ %s thắng", selectedPiece.getColor() == Color.WHITE ? "Trắng" : "Đen"));
+                                if(!CheckmateService.killCheckmateKing(chessCheckmate.getChessCheckmate())){
+                                    /*
+                                    * - Nếu không quân cờ nào có thể kill được quân cờ chiếu vua,
+                                    *       kiểm tra xem có quân cờ nào có thể ra chặn chiếu quân vua được không
+                                    *       trong trường hợp quân chiếu là tốt mã hoặc townsg đối phương thì không cần phải check case này
+                                    * */
+
+                                    showPopupNotify(String.format("Hết cờ, phía cờ %s thắng", selectedPiece.getColor() == Color.WHITE ? "Trắng" : "Đen"));
+                                }
+
                             }
 
                             /*
