@@ -2,9 +2,16 @@ package service;
 
 import entity.ChessPiece;
 
+import java.awt.*;
+
 import static Utils.Helper.*;
 
 public class StepService {
+
+    /*
+     * - Kiểm tra ô muốn di chuyển tồn tại quân chưa
+     * - Nước đi có hợp lệ không
+     * */
     public static boolean isValidTuong(int startRow, int startColumn, int endRow, int endColumn) {
         int deltaX = endRow - startRow;
         int deltaY = endColumn - startColumn;
@@ -23,12 +30,45 @@ public class StepService {
         return false;
     }
 
+    public static boolean isValidTuongCustomCheckKing(ChessPiece chessKing, int startRow, int startColumn, int endRow, int endColumn) {
+        int deltaX = endRow - startRow;
+        int deltaY = endColumn - startColumn;
+
+        for (int i = 1; i < Math.abs(deltaX); i++) {
+            int row = startRow + (deltaX < 0 ? -i : i);
+            int column = startColumn + (deltaY < 0 ? -i : i);
+            ChessPiece chessSelect = getChessPieceAt(row, column);
+            if (chessSelect != null && !chessSelect.equals(chessKing)) return false;
+        }
+
+        if (Math.abs(deltaX) == Math.abs(deltaY)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /*
+    * - Nếu quân hậu có row hoặc column băn đầu bằng row hoặc column sau khi di chuyển thì có nghĩa là quân hậu đi ngang giống quân xe
+    *       + Lúc này hauChess = true
+    * - Ngược lại thì quân hậu di chuyển giống quân tượng
+    *       + Lúc này hauChess = false
+    * */
     public static boolean validHau(int startRow, int startColumn, int endRow, int endColumn) {
-        return isValidQuanXe(startRow, startColumn, endRow, endColumn) || isValidTuong(startRow, startColumn, endRow, endColumn);
+        boolean hauChess = startRow == endRow || startColumn == endColumn;
+        return hauChess ? isValidQuanXe(startRow, startColumn, endRow, endColumn) : isValidTuong(startRow, startColumn, endRow, endColumn);
+    }
+
+    public static boolean validHauCustomCheckKing(ChessPiece chessKing, int startRow, int startColumn, int endRow, int endColumn) {
+        boolean hauChess = startRow == endRow || startColumn == endColumn;
+        return hauChess ? isValidQuanXeCustomCheckKing(chessKing, startRow, startColumn, endRow, endColumn) :
+                isValidTuongCustomCheckKing(chessKing, startRow, startColumn, endRow, endColumn);
     }
 
 
     public static boolean isValidQuanMa(int startRow, int startColumn, int endRow, int endColumn) {
+
+
         int deltaX = Math.abs(endRow - startRow);
         int deltaY = Math.abs(endColumn - startColumn);
 
@@ -60,6 +100,36 @@ public class StepService {
                 int index = deltaX < 0 ? i * -1 : i;
                 ChessPiece chessBetween = getChessPieceAt(startX + index, startY);
                 if (null != chessBetween) {
+                    //Tồn tại 1 quân cờ giữa đường đi
+                    printLog("Tồn tại 1 quân cờ giữa đường đi!");
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean isValidQuanXeCustomCheckKing(ChessPiece chessKing,int startX, int startY, int endX, int endY) {
+        int deltaX = endX - startX;
+        int deltaY = endY - startY;
+        if (deltaX == 0 && deltaY != 0) {
+            for (int i = 1; i < Math.abs(deltaY); i++) {
+                int index = deltaY < 0 ? i * -1 : i;
+                ChessPiece chessBetween = getChessPieceAt(startX, startY + index);
+                if (null != chessBetween && !chessBetween.equals(chessKing)) {
+                    //Tồn tại 1 quân cờ giữa đường đi
+                    printLog("Tồn tại 1 quân cờ giữa đường đi!");
+                    return false;
+                }
+            }
+            return true;
+        }
+        if (deltaY == 0 && deltaX != 0) {
+            for (int i = 1; i < Math.abs(deltaX); i++) {
+                int index = deltaX < 0 ? i * -1 : i;
+                ChessPiece chessBetween = getChessPieceAt(startX + index, startY);
+                if (null != chessBetween  && !chessBetween.equals(chessKing)) {
                     //Tồn tại 1 quân cờ giữa đường đi
                     printLog("Tồn tại 1 quân cờ giữa đường đi!");
                     return false;

@@ -9,7 +9,9 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+
 import static Utils.Helper.*;
+
 public class ChessGame extends JFrame {
     private static JPanel chessBoard;
 
@@ -28,12 +30,16 @@ public class ChessGame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Tạo bảng chứa ô cờ
+        /*
+         * - Vẽ bàn cờ 8 x 8
+         * */
         chessBoard = new JPanel();
         chessBoard.setLayout(new GridLayout(8, 8));
         add(chessBoard);
 
-        // Tạo các ô cờ
+        /*
+         * - Tạo các ô cờ
+         * */
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 JPanel square = new JPanel();
@@ -47,7 +53,9 @@ public class ChessGame extends JFrame {
         }
         setVisible(true);
 
-        //Khởi tạo các quân cờ
+        /*
+         * - Khởi tạo các quân cờ
+         * */
         chessPieces = Helper.initDefaultChessMan();
 
         displayChessPieces();
@@ -68,11 +76,12 @@ public class ChessGame extends JFrame {
 //                    if(!isCheckTurn()) return;
                     if (null == selectedPiece) {
                         showPopupNotify("Không có quân cờ được chọn");
-                        printLog("Khong co quan co nao duoc chon");
+                        printLog("Không có quân cờ nào được chọn");
                     } else {
                         printLog(String.format("Chon quan %s, mau = %s row = %d column = %d", selectedPiece.getType(), selectedPiece.getColor() == Color.BLACK ? "BLACK" : "WHITE", selectedPiece.getRow(), selectedPiece.getColumn()));
                     }
                 } else {
+                    ChessPiece chessSelectHistory = selectedPiece.cloneChess();
                     // Di chuyển quân cờ nếu ô cờ trống và hợp lệ
                     if (isValidMove(selectedPiece, row, column)) {
                         ChessPiece isChessExist = getChessPieceAt(row, column);
@@ -106,18 +115,55 @@ public class ChessGame extends JFrame {
                             }
                         }
                         isTurn = !isTurn;
-                        if (isChessExist != null) chessPieces.remove(isChessExist);
 
                         ChessCheckmate chessCheckmate = CheckmateService.checkmateKing();
-                        if(chessCheckmate!=null){
+                        if (chessCheckmate != null) {
                             /*
-                            * - Sau khi di chuyển quân cờ kiểm tra xem quân VUA của người chơi vừa di chuyển có bị chiếu hay không
-                            * - Nếu có thực hiện show popup warning và thực hiện reset nước cờ vừa đi
-                            * */
-                            if(chessCheckmate.getKing().getColor()==selectedPiece.getColor()){
-                                showPopupNotify(String.format("Quân vua của bạn đang gặp nguy hiểm bởi quân %s của đối thủ !!", chessCheckmate.getChessCheckmate().getType()));
+                             * - Kiểm tra cờ chết
+                             * */
+                            if (checkChessDie(chessCheckmate)) {
+                                /*
+                                 * - Trong trường hợp xảy ra chiếu cờ và quân vua không còn nước cờ nào có thể đi.
+                                 * - Thì kiểm tra xem phía quân bị
+                                 * */
+                                showPopupNotify(String.format("Hết cờ, phía cờ %s thắng", selectedPiece.getColor() == Color.WHITE ? "Trắng" : "Đen"));
                             }
+
+                            /*
+                             * - Sau khi di chuyển quân cờ kiểm tra xem quân VUA của người chơi vừa di chuyển có bị chiếu hay không
+                             * - Nếu có thực hiện show popup warning và thực hiện reset nước cờ vừa đi
+                             * */
+                            if (chessCheckmate.getKing().getColor() == selectedPiece.getColor()) {
+                                showPopupNotify(String.format("Quân vua của bạn đang gặp nguy hiểm bởi quân %s của đối thủ !!", chessCheckmate.getChessCheckmate().getType()));
+                                /*
+                                 * - Khôi phục lại quân cờ nếu bị đối thủ ăn mất
+                                 * */
+                                JPanel squareRefresh = (JPanel) chessBoard.getComponent(row * 8 + column);
+                                squareRefresh.removeAll();
+                                if (isChessExist != null) {
+                                    JLabel pieceLabel = new JLabel(getChessPieceIcon(isChessExist.getType(), isChessExist.getColor()));
+                                    squareRefresh.add(pieceLabel);
+                                }
+
+                                /*
+                                 * - reset lại quân cờ vừa đánh
+                                 * */
+                                for (ChessPiece piece : chessPieces) {
+                                    if (piece.getRow() == selectedPiece.getRow() && piece.getColumn() == selectedPiece.getColumn()) {
+                                        piece.setColumn(chessSelectHistory.getColumn());
+                                        piece.setRow(chessSelectHistory.getRow());
+                                        JPanel square = (JPanel) chessBoard.getComponent(chessSelectHistory.getRow() * 8 + chessSelectHistory.getColumn());
+                                        JLabel pieceLabel = new JLabel(getChessPieceIcon(chessSelectHistory.getType(), chessSelectHistory.getColor()));
+                                        square.add(pieceLabel);
+                                    }
+                                }
+                            }
+
+                            /*
+                             * - Xóa quân cờ nếu bị ăn bởi đối thủ
+                             * */
                         }
+                        if (isChessExist != null) chessPieces.remove(isChessExist);
                     } else {
                         printLog(String.format("Nuoc di khong hop le cho quan %s", selectedPiece.getType()));
                         showPopupNotify("Nước cờ đi không hợp lệ");
@@ -130,13 +176,15 @@ public class ChessGame extends JFrame {
         });
     }
 
-    private boolean isCheckTurn(){
-        //Kiểm tra lượt đi của bên cờ màu nào
+    /*
+     * - Dùng để kiểm tra lượt đi xen kẽ đen và trắng
+     * */
+    private boolean isCheckTurn() {
         if (isTurn && selectedPiece.getColor() == Color.BLACK) {
             showPopupNotify("Lượt đi của quân trắng!");
             selectedPiece = null;
             return false;
-        } else if (!isTurn && selectedPiece.getColor() == Color.WHITE){
+        } else if (!isTurn && selectedPiece.getColor() == Color.WHITE) {
             showPopupNotify("Lượt đi của quân đen!");
             selectedPiece = null;
             return false;
@@ -145,13 +193,13 @@ public class ChessGame extends JFrame {
         }
     }
 
+    /*
+        - Trả về true & false
+        - True là nước đi hợp lệ được phép
+        - False là nước đi không hợp lệ
+        - Sử dụng switch case chia trường hợp các quân cờ có cách đi khác nhau: tốt, xe , mã, tượng, hậu, tướng
+    */
     private boolean isValidMove(ChessPiece piece, int row, int column) {
-        /*
-            - Trả về true & false
-            - True là nước đi hợp lệ được phép
-            - False là nước đi không hợp lệ
-            - Sử dụng switch case chia trường hợp các quân cờ có cách đi khác nhau: tốt, xe , mã, tượng, hậu, tướng
-        */
         boolean result = false;
         switch (piece.getType()) {
             case "MA" -> result = StepService.isValidQuanMa(piece.getRow(), piece.getColumn(), row, column);
@@ -173,7 +221,6 @@ public class ChessGame extends JFrame {
     }
 
 
-
     private void displayChessPieces() {
         for (ChessPiece piece : chessPieces) {
             JPanel square = (JPanel) chessBoard.getComponent(piece.getRow() * 8 + piece.getColumn());
@@ -188,6 +235,10 @@ public class ChessGame extends JFrame {
         return new ImageIcon(image);
     }
 
+    /*
+    * - Xử lý thăng cấp đối với quân tốt khi di chuyển đến cuối bàn cờ
+    * - Hiển thị popup cho phép người chơi chọn giữa quân xe, tượng, mã, hậu
+    * */
     public static void leverUp(boolean isBlack, int row, int column) {
         String formatImage = Helper.PATH_IMAGE + "%s_%s.gif";
         ImageIcon hau = new ImageIcon(String.format(formatImage, "HAU", isBlack ? "DEN" : "TRANG"));

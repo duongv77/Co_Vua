@@ -46,4 +46,8 @@ public class ChessPiece {
         this.row = row;
         this.column = column;
     }
+
+    public ChessPiece cloneChess(){
+        return new ChessPiece(this.type, this.color, this.row, this.column);
+    }
 }

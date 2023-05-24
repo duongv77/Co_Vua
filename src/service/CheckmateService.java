@@ -32,4 +32,22 @@ public class CheckmateService {
         }
         return null;
     }
+
+    /*
+    * - Kiểm tra xem nước đi của quân vua có bị chiếu không
+    * */
+    public static boolean checkmateKingCustom(int row, int column) {
+        for (ChessPiece chessNormal : chessPieces) {
+            for (int i = 0; i < 8; i++) {
+                for (int j = 0; j < 8; j++) {
+                    if (isValidStep(chessNormal, i, j)) {
+                        if(i == row && j == column){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
 }
