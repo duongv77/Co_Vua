@@ -73,7 +73,7 @@ public class ChessGame extends JFrame {
                 if (selectedPiece == null) {
                     // Chọn quân cờ nếu ô cờ không trống
                     selectedPiece = getChessPieceAt(row, column);
-//                    if(!isCheckTurn()) return;
+                    if(!isCheckTurn()) return;
                     if (null == selectedPiece) {
                         showPopupNotify("Không có quân cờ được chọn");
                         printLog("Không có quân cờ nào được chọn");
