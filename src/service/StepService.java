@@ -67,8 +67,6 @@ public class StepService {
 
 
     public static boolean isValidQuanMa(int startRow, int startColumn, int endRow, int endColumn) {
-
-
         int deltaX = Math.abs(endRow - startRow);
         int deltaY = Math.abs(endColumn - startColumn);
 

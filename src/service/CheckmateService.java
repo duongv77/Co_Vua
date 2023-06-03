@@ -45,16 +45,21 @@ public class CheckmateService {
         boolean result = false;
         for (ChessPiece chessPiece : chessPieces) {
             if (!chessPiece.getColor().equals(chessMate.getColor())) {
+                if(chessPiece.getType().equals("TOT") && (chessMate.getRow() == chessPiece.getRow() || chessMate.getColumn() == chessPiece.getColumn())) continue;
                 result = isValidStep(chessPiece, chessMate.getRow(), chessMate.getColumn());
             }
-            if (result) break;
+            if (result) {
+                printLog(String.format("Quân cờ %s có thể ăn quân cờ %s đang chiếu vua ở vị trí row-col %d-%d",
+                        chessPiece.getType(), chessMate.getType(), chessPiece.getRow(), chessPiece.getColumn()));
+                break;
+            }
         }
         return result;
     }
 
     /*
      * - Tham số truyền vào là quân vua và quân chiếu quân vua
-     * - Nếu có thể có 1 quân cờ có thể bảo vệ quân vua bằng cách phù hợp với 1 trong những ô ở giữa thì trả về true, ngược lại trả về false
+     * - Nếu có thể có 1 quân cờ có thể buảo vệ quân vua bằng cách phù hợp với 1 trong những ô ở giữa thì trả về tre, ngược lại trả về false
      * */
     public static boolean shieldChessKing(ChessPiece chessMateKing, ChessPiece chessKing) {
         Map<Integer, Integer> listLocationShield = new HashMap<>();
@@ -77,7 +82,10 @@ public class CheckmateService {
             if(chess.getColor().equals(chessKing.getColor()) && !chess.getType().equals("VUA") && listLocationShield.size()>0){
                 for (Integer row: listLocationShield.keySet()) {
                     result = isValidStep(chess, row, listLocationShield.get(row));
-                    if (result) break;
+                    if (result) {
+                        printLog(String.format("Quân cờ %S có thể chặn chiếu tướng", chess.getType()));
+                        break;
+                    }
                 }
                 if (result) break;
             }

@@ -73,7 +73,7 @@ public class ChessGame extends JFrame {
                 if (selectedPiece == null) {
                     // Chọn quân cờ nếu ô cờ không trống
                     selectedPiece = getChessPieceAt(row, column);
-                    if(!isCheckTurn()) return;
+//                    if(!isCheckTurn()) return;
                     if (null == selectedPiece) {
                         showPopupNotify("Không có quân cờ được chọn");
                         printLog("Không có quân cờ nào được chọn");
@@ -132,10 +132,14 @@ public class ChessGame extends JFrame {
                                     *       kiểm tra xem có quân cờ nào có thể ra chặn chiếu quân vua được không
                                     *       trong trường hợp quân chiếu là tốt mã hoặc townsg đối phương thì không cần phải check case này
                                     * */
-
-                                    showPopupNotify(String.format("Hết cờ, phía cờ %s thắng", selectedPiece.getColor() == Color.WHITE ? "Trắng" : "Đen"));
+                                    if(!CheckmateService.shieldChessKing(chessCheckmate.getChessCheckmate() ,chessCheckmate.getKing())){
+                                        showPopupNotify(String.format("Hết cờ, phía cờ %s thắng", selectedPiece.getColor() == Color.WHITE ? "Trắng" : "Đen"));
+                                        System.exit(1);
+                                    }
                                 }
 
+                            } else {
+                                printLog("Quân vua vẫn còn đường để đi");
                             }
 
                             /*
