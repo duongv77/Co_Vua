@@ -73,7 +73,7 @@ public class ChessGame extends JFrame {
                 if (selectedPiece == null) {
                     // Chọn quân cờ nếu ô cờ không trống
                     selectedPiece = getChessPieceAt(row, column);
-//                    if(!isCheckTurn()) return;
+                    if(!isCheckTurn()) return;
                     if (null == selectedPiece) {
                         showPopupNotify("Không có quân cờ được chọn");
                         printLog("Không có quân cờ nào được chọn");
@@ -134,7 +134,7 @@ public class ChessGame extends JFrame {
                                     * */
                                     if(!CheckmateService.shieldChessKing(chessCheckmate.getChessCheckmate() ,chessCheckmate.getKing())){
                                         showPopupNotify(String.format("Hết cờ, phía cờ %s thắng", selectedPiece.getColor() == Color.WHITE ? "Trắng" : "Đen"));
-                                        System.exit(1);
+//                                        System.exit(1);
                                     }
                                 }
 
@@ -151,6 +151,7 @@ public class ChessGame extends JFrame {
                                 /*
                                  * - Khôi phục lại quân cờ nếu bị đối thủ ăn mất
                                  * */
+                                isTurn = !isTurn;
                                 JPanel squareRefresh = (JPanel) chessBoard.getComponent(row * 8 + column);
                                 squareRefresh.removeAll();
                                 if (isChessExist != null) {
@@ -177,6 +178,15 @@ public class ChessGame extends JFrame {
                              * */
                         }
                         if (isChessExist != null) chessPieces.remove(isChessExist);
+                        long count = chessPieces.stream().filter(elm->elm.getType().equals("VUA")).count();
+                        if(count<2){
+                            chessPieces.forEach(elm->{
+                                if(elm.getType().equals("VUA")){
+                                    showPopupNotify(String.format("Hết cờ, phía cờ %s thắng", elm.getColor() == Color.WHITE ? "Trắng" : "Đen"));
+                                    System.exit(1);
+                                }
+                            });
+                        }
                     } else {
                         printLog(String.format("Nuoc di khong hop le cho quan %s", selectedPiece.getType()));
                         showPopupNotify("Nước cờ đi không hợp lệ");

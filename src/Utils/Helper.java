@@ -111,9 +111,10 @@ public class Helper {
             case "HAU" -> result = StepService.validHau(piece.getRow(), piece.getColumn(), row, column);
             case "VUA" -> result = StepService.validVua(piece.getRow(), piece.getColumn(), row, column);
         }
-        if (result) {
-            return checkColor(piece, row, column);
-        } else return false;
+        return result;
+//        if (result) {
+//            return checkColor(piece, row, column);
+//        } else return false;
     }
 
     /*

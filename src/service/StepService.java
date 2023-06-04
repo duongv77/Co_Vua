@@ -156,6 +156,12 @@ public class StepService {
         -1 đi xuống*/
         int direction = isBlackPiece ? 1 : -1;
 
+        if(direction==1){
+            if(endX>startX) return false;
+        } else {
+            if(endX<startX) return false;
+        }
+
         // Kiểm tra nước đi lên trên một ô
         if (deltaX == -direction && deltaY == 0) {
             ChessPiece chessSelect = getChessPieceAt(endX, endY);
@@ -168,7 +174,7 @@ public class StepService {
         }
 
         //Kiểm tra đi chéo ăn quân đối thủ
-        if (Math.abs(deltaX) == 1) {
+        if (Math.abs(deltaX) == 1 && Math.abs(deltaY)==1) {
             ChessPiece chessSelect = getChessPieceAt(endX, endY);
             return chessSelect != null;
         }
